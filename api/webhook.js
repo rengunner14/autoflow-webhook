@@ -1,7 +1,7 @@
-const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'autoflow_verify_12345';
+export default function handler(req, res) {
+  const VERIFY_TOKEN = 'autoflow_verify_12345';
 
-export default async function handler(req, res) {
-  // Handle GET request (Meta verification)
+  // GET request - Meta verification
   if (req.method === 'GET') {
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
@@ -14,45 +14,12 @@ export default async function handler(req, res) {
     return res.status(403).send('Forbidden');
   }
 
-  // Handle POST request (incoming events from Meta)
+  // POST request - Incoming events
   if (req.method === 'POST') {
-    const body = req.body;
-    console.log('Received webhook:', JSON.stringify(body, null, 2));
-
-    // Instagram events
-    if (body.object === 'instagram') {
-      body.entry?.forEach((entry) => {
-        entry.changes?.forEach((change) => {
-          if (change.field === 'comments') {
-            console.log('New comment:', change.value);
-          }
-          if (change.field === 'messages') {
-            console.log('New message:', change.value);
-          }
-        });
-
-        entry.messaging?.forEach((event) => {
-          if (event.message) {
-            console.log('DM received:', event.message.text);
-          }
-        });
-      });
-    }
-
-    // Facebook/Messenger events
-    if (body.object === 'page') {
-      body.entry?.forEach((entry) => {
-        entry.messaging?.forEach((event) => {
-          if (event.message) {
-            console.log('Messenger message:', event.message.text);
-          }
-        });
-      });
-    }
-
+    console.log('Received webhook:', JSON.stringify(req.body, null, 2));
     return res.status(200).send('EVENT_RECEIVED');
   }
 
-  // Default response for other methods (like browser visit)
-  return res.status(200).send('AutoFlow Webhook Server is running');
+  // Default response
+  return res.status(200).send('AutoFlow Webhook is running');
 }
